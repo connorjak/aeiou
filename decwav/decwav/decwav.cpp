@@ -1,5 +1,7 @@
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <sstream>
 #include <windows.h>
 
 #include "TTSAPI.H"
@@ -58,6 +60,20 @@ tts_close(LPTTS_HANDLE_T *handle)
 	*handle = nullptr;
 }
 
+std::string readFile(const std::string& fileName) {
+	std::ifstream file(fileName);
+	if (file.is_open()) {
+		std::stringstream buffer;
+		buffer << file.rdbuf();
+		file.close();
+		return buffer.str();
+	}
+	else {
+		std::cerr << "Unable to open file: " << fileName << std::endl;
+		return "";
+	}
+}
+
 int
 main(void)
 {
@@ -71,12 +87,14 @@ main(void)
 		std::cout << "Ready" << std::endl;
 
 		std::getline(std::cin, filename);
-		std::getline(std::cin, text);
-
+		//std::getline(std::cin, text);
+		
 		if (std::cin.fail() || std::cin.eof())
 			break;
 
-		tts_speak(handle, filename, text);
+		text = readFile("input/" + filename + ".txt");
+
+		tts_speak(handle, "output/" + filename + ".wav", text);
 		std::cout << "Success" << std::endl;
 
 		tts_close(&handle);
