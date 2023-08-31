@@ -3,14 +3,15 @@
 #include <string>
 #include <sstream>
 #include <windows.h>
+#include <exception>
 
 #include "TTSAPI.H"
 
 #define MMSUCCEEDED(x) ((x) == MMSYSERR_NOERROR)
 #define MMFAILED(x) (!MMSUCCEEDED(x))
 #define ABORT(fn, code) { \
-		std::cout << "Error at " << __FILE__ << ":" << __LINE__ << " after call to " << fn << ": " << code << std::endl << std::flush; \
-		exit(1); \
+		throw std::runtime_error("Error at " __FILE__ ":" + std::to_string(__LINE__) + " after call to " fn ": " + std::to_string(code)); \
+		/*exit(1);*/ \
 	}
 
 static void
@@ -79,6 +80,9 @@ main(void)
 {
 	LPTTS_HANDLE_T handle = nullptr;
 
+	try
+	{
+
 	while (true) {
 		std::string filename;
 		std::string text;
@@ -99,6 +103,10 @@ main(void)
 
 		tts_close(&handle);
 	}
-
+	}
+	catch (std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
 	return 0;
 }
